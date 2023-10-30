@@ -22,7 +22,7 @@ The simplified server can handle basic SET, GET, DEL, EXPIRE, KEYS, TTL, ZADD an
 * ZADD: Store a key in a sorted set.
     * ```ZADD key score value``` 
 * ZRANGE: Fetch the score and value of a given key between min and max score.
-    * ```ZRANGE key minscore maxscore``` 
+    * ```ZRANGE key minindex maxindex``` 
 
 
 ## Getting Started
