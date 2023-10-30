@@ -97,11 +97,11 @@ func (ds *DataStore) ZAdd(key string, score float64, member []byte) (int, error)
 		if !ok {
 			return 0, errs.WrongType
 		}
-		sList.Set(score, member)
+		sList.Set(sList.Back().Score()+1, map[float64][]byte{score: []byte(member)})
 		ds.data[key] = sList
 	} else {
 		skipList := skiplist.New(skiplist.Float64)
-		skipList.Set(score, member)
+		skipList.Set(0, map[float64][]byte{score: []byte(member)})
 		ds.data[key] = skipList
 	}
 	return 1, nil
@@ -120,7 +120,10 @@ func (ds *DataStore) ZRange(key string, start float64, stop float64) (map[float6
 		}
 		elem := sList.Find(start)
 		for elem != nil && elem.Score() <= stop {
-			data[elem.Score()] = string(elem.Value.([]byte))
+			val, _ := elem.Value.(map[float64][]byte)
+			for k, v := range val {
+				data[k] = string(v)
+			}
 			elem = elem.Next()
 		}
 	}

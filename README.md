@@ -49,13 +49,28 @@ These instructions will help you get the project up and running on your local ma
     nc <localhostip> 80
 5. You can interact with the server by entering Redis-like commands in the client. For example
     ```bash
-    KEYS
-    saurabh (returned key)
-    SET singh singh 
+    redis> SET test test123
     OK
-    KEYS
-    saurabh
-    singh
-    KEYS *
-    saurabh
-    singh
+    redis> SET care care123
+    OK
+    redis> GET test
+    test123
+    redis> KEYS
+    ERR wrong number of arguments for given command
+    redis> KEYS *
+    test
+    care
+    redis> EXPIRE test 10
+    1
+    redis> TTL test
+    7
+    redis> KEYS *
+    care
+    redis> ZADD saurabh 10 saurabh10
+    1
+    redis> ZADD saurabh 12 saurabh12
+    1
+    redis> ZRANGE saurabh 0 1
+    saurabh12  12.000000
+    saurabh10  10.000000
+

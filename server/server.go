@@ -80,7 +80,6 @@ func (s *Server) writeError(err error, conn net.Conn) {
 }
 
 func (s *Server) writeSuccess(value any, conn net.Conn) {
-	fmt.Println(value)
 	switch v := value.(type) {
 	case int:
 		conn.Write([]byte(fmt.Sprintf("%d\n", v)))
