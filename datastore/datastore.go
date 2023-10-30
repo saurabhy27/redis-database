@@ -47,6 +47,7 @@ func (ds *DataStore) Delete(key string) error {
 		return errs.NoDataFound
 	}
 	delete(ds.data, key)
+	delete(ds.expireData, key)
 	return nil
 }
 
@@ -110,7 +111,7 @@ func (ds *DataStore) ZAdd(key string, score float64, member []byte) error {
 	return nil
 }
 
-func (ds *DataStore) ZRange(key string, start float64, stop float64) (map[float64][]byte, error) {
+func (ds *DataStore) ZRange(key string, start float64, stop float64) (map[float64]string, error) {
 	ds.lock.RLock()
 	defer ds.lock.RUnlock()
 
@@ -122,10 +123,10 @@ func (ds *DataStore) ZRange(key string, start float64, stop float64) (map[float6
 	if !ok {
 		return nil, errs.WrongType
 	}
-	data := make(map[float64][]byte)
+	data := make(map[float64]string)
 	elem := sList.Find(start)
 	for elem != nil && elem.Score() <= stop {
-		data[elem.Score()] = elem.Value.([]byte)
+		data[elem.Score()] = string(elem.Value.([]byte))
 		elem = elem.Next()
 	}
 	return data, nil

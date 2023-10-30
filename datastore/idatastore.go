@@ -8,5 +8,5 @@ type DataStoreInterface interface {
 	Set(key string, value []byte)
 	Ttl(key string) int
 	ZAdd(key string, score float64, member []byte) error
-	ZRange(key string, start float64, stop float64) (map[float64][]byte, error)
+	ZRange(key string, start float64, stop float64) (map[float64]string, error)
 }

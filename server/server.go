@@ -79,11 +79,22 @@ func (s *Server) writeError(err error, conn net.Conn) {
 }
 
 func (s *Server) writeSuccess(value any, conn net.Conn) {
-
-	// if len(value) == 0 {
-	// 	conn.Write([]byte("OK\n"))
-	// 	return
-	// }
-	fmt.Println(value)
-	conn.Write([]byte(fmt.Sprintf("OK: %v\n", value)))
+	switch v := value.(type) {
+	case int:
+		conn.Write([]byte(fmt.Sprintf("OK: %d\n", v)))
+	case []string:
+		for _, s := range v {
+			conn.Write([]byte(fmt.Sprintf("%v\n", s)))
+		}
+	case map[float64]string:
+		for k, v := range v {
+			conn.Write([]byte(fmt.Sprintf("%v  %f\n", v, k)))
+		}
+	case nil:
+		conn.Write([]byte("OK\n"))
+	case []byte:
+		conn.Write([]byte(fmt.Sprintf("OK: %s\n", v)))
+	default:
+		fmt.Println("Type is unknown!")
+	}
 }
