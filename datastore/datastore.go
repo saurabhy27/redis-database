@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"log"
 	"regexp"
 	"sync"
 	"time"
@@ -10,22 +11,26 @@ import (
 )
 
 type DataStore struct {
-	lock       sync.RWMutex
-	data       map[string]any
+	lock       sync.RWMutex   // to avoid modifing values from multiple goroutines
+	data       map[string]any // key:value
 	expireData map[string]int // Key:expireEpoxTimestamp
 }
 
-func NewDataStore() *DataStore {
+func New() *DataStore {
 	return &DataStore{data: make(map[string]any), expireData: make(map[string]int)}
 }
 
 func (ds *DataStore) Set(key string, value []byte) {
+	// setting the values in the map
+	log.Printf("Seting the value for key %s\n", key)
 	ds.lock.Lock()
 	defer ds.lock.Unlock()
 	ds.data[key] = value
 }
 
 func (ds *DataStore) Get(key string) ([]byte, error) {
+	// getting the values in the map
+	log.Printf("Fetching the value for key %s\n", key)
 	ds.lock.RLock()
 	defer ds.lock.RUnlock()
 	value, ok := ds.data[key]
@@ -40,6 +45,7 @@ func (ds *DataStore) Get(key string) ([]byte, error) {
 }
 
 func (ds *DataStore) Delete(key string) int {
+	log.Printf("Deleting the key %s\n", key)
 	ds.lock.Lock()
 	defer ds.lock.Unlock()
 	_, ok := ds.data[key]
@@ -52,6 +58,7 @@ func (ds *DataStore) Delete(key string) int {
 }
 
 func (ds *DataStore) Keys(filter string) ([]string, error) {
+	log.Printf("Fetching all the keys with filter %s\n", filter)
 	ds.lock.RLock()
 	defer ds.lock.RUnlock()
 	var keys []string
@@ -79,6 +86,7 @@ func (ds *DataStore) expireInBackground(key string, seconds int) {
 }
 
 func (ds *DataStore) Expire(key string, seconds int) int {
+	log.Printf("Expiring the keys %s in %d seconds\n", key, seconds)
 	_, ok := ds.data[key]
 	if !ok {
 		return 0
@@ -89,6 +97,7 @@ func (ds *DataStore) Expire(key string, seconds int) int {
 }
 
 func (ds *DataStore) ZAdd(key string, score float64, member []byte) (int, error) {
+	log.Printf("Adding the key %s score %f in sorted set\n", key, score)
 	ds.lock.Lock()
 	defer ds.lock.Unlock()
 	value, ok := ds.data[key]
@@ -108,6 +117,7 @@ func (ds *DataStore) ZAdd(key string, score float64, member []byte) (int, error)
 }
 
 func (ds *DataStore) ZRange(key string, start float64, stop float64) (map[float64]string, error) {
+	log.Printf("Retrieving the key %s from start index %f to stop index %f from sorted set\n", key, start, stop)
 	ds.lock.RLock()
 	defer ds.lock.RUnlock()
 	data := make(map[float64]string)
@@ -131,6 +141,7 @@ func (ds *DataStore) ZRange(key string, start float64, stop float64) (map[float6
 }
 
 func (ds *DataStore) Ttl(key string) int {
+	log.Printf("Retrieving the expire of key %s\n", key)
 	ds.lock.RLock()
 	defer ds.lock.RUnlock()
 	expireEpoxTimestamp, ok := ds.expireData[key]
