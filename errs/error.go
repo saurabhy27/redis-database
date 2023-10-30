@@ -7,4 +7,5 @@ var (
 	InvalidCommand = errors.New("INVALID COMMAND")
 	EmptyRequest   = errors.New("EMPTY REQUESTS")
 	WrongType      = errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	MinReqParams   = errors.New("PASS MINIMUM REQUIRED PARAMS")
 )

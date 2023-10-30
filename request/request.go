@@ -8,7 +8,8 @@ import (
 )
 
 type Command struct {
-	Cmd string
+	Cmd          string
+	MinReqParams int
 }
 
 type Request struct {
@@ -17,14 +18,14 @@ type Request struct {
 }
 
 var (
-	CMDGet    Command = Command{Cmd: constants.GET}
-	CMDDel    Command = Command{Cmd: constants.DEL}
-	CMDExpire Command = Command{Cmd: constants.EXPIRE}
-	CMDKeys   Command = Command{Cmd: constants.KEYS}
-	CMDSet    Command = Command{Cmd: constants.SET}
-	CMDTtl    Command = Command{Cmd: constants.TTL}
-	CMDZAdd   Command = Command{Cmd: constants.ZADD}
-	CMDZRange Command = Command{Cmd: constants.ZRANGE}
+	CMDGet    Command = Command{Cmd: constants.GET, MinReqParams: 1}
+	CMDDel    Command = Command{Cmd: constants.DEL, MinReqParams: 1}
+	CMDExpire Command = Command{Cmd: constants.EXPIRE, MinReqParams: 2}
+	CMDKeys   Command = Command{Cmd: constants.KEYS, MinReqParams: 1}
+	CMDSet    Command = Command{Cmd: constants.SET, MinReqParams: 2}
+	CMDTtl    Command = Command{Cmd: constants.TTL, MinReqParams: 1}
+	CMDZAdd   Command = Command{Cmd: constants.ZADD, MinReqParams: 3}
+	CMDZRange Command = Command{Cmd: constants.ZRANGE, MinReqParams: 3}
 )
 
 func parseCommand(cmd string) (Command, error) {
@@ -59,5 +60,9 @@ func ParseProtocol(input string) (Request, error) {
 	if err != nil {
 		return Request{}, errs.InvalidCommand
 	}
-	return Request{Command: command, Params: input_splited[1:]}, nil
+	params := input_splited[1:]
+	if len(params) < command.MinReqParams {
+		return Request{}, errs.MinReqParams
+	}
+	return Request{Command: command, Params: params}, nil
 }

@@ -58,12 +58,9 @@ func (rp *RequestProcessor) processDel(request req.Request) (req.Responce, error
 }
 
 func (rp *RequestProcessor) processKeys(request req.Request) (req.Responce, error) {
-	filter := ""
-	if len(request.Params) != 0 {
-		filter = request.Params[0]
-		filter = strings.ReplaceAll(filter, "*", "\\\\*")
-		filter = strings.ReplaceAll(filter, "?", "\\\\?")
-	}
+	filter := request.Params[0]
+	filter = strings.ReplaceAll(filter, "*", "\\\\*")
+	filter = strings.ReplaceAll(filter, "?", "\\\\?")
 	data, err := rp.DataStore.Keys(filter)
 	if err != nil {
 		return req.Responce{}, err
