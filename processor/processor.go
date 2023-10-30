@@ -49,12 +49,12 @@ func (rp *RequestProcessor) processSet(request req.Request) (req.Responce, error
 	key := request.Params[0]
 	value := request.Params[1]
 	rp.DataStore.Set(key, []byte(value))
-	return req.Responce{Success: true}, nil
+	return req.Responce{Success: true, Value: "OK"}, nil
 }
 
 func (rp *RequestProcessor) processDel(request req.Request) (req.Responce, error) {
-	rp.DataStore.Delete(request.Params[0])
-	return req.Responce{Success: true}, nil
+	deleted := rp.DataStore.Delete(request.Params[0])
+	return req.Responce{Success: true, Value: deleted}, nil
 }
 
 func (rp *RequestProcessor) processKeys(request req.Request) (req.Responce, error) {
@@ -75,11 +75,8 @@ func (rp *RequestProcessor) processExpire(request req.Request) (req.Responce, er
 	if err != nil {
 		return req.Responce{}, err
 	}
-	err = rp.DataStore.Expire(key, secondsTTL)
-	if err != nil {
-		return req.Responce{}, err
-	}
-	return req.Responce{Success: true}, nil
+	expires := rp.DataStore.Expire(key, secondsTTL)
+	return req.Responce{Success: true, Value: expires}, nil
 }
 
 func (rp *RequestProcessor) processTtl(request req.Request) (req.Responce, error) {
@@ -93,14 +90,13 @@ func (rp *RequestProcessor) processZAdd(request req.Request) (req.Responce, erro
 	value := request.Params[2]
 	scoreFloat, err := strconv.ParseFloat(score, 32)
 	if err != nil {
-		return req.Responce{}, err
+		return req.Responce{}, errs.InvalidFloatValue
 	}
-
-	err = rp.DataStore.ZAdd(key, scoreFloat, []byte(value))
+	added, err := rp.DataStore.ZAdd(key, scoreFloat, []byte(value))
 	if err != nil {
 		return req.Responce{}, err
 	}
-	return req.Responce{Success: true}, nil
+	return req.Responce{Success: true, Value: added}, nil
 }
 
 func (rp *RequestProcessor) processZRange(request req.Request) (req.Responce, error) {
@@ -109,12 +105,12 @@ func (rp *RequestProcessor) processZRange(request req.Request) (req.Responce, er
 	stop := request.Params[2]
 	startFloat, err := strconv.ParseFloat(start, 32)
 	if err != nil {
-		return req.Responce{}, err
+		return req.Responce{}, errs.InvalidFloatValue
 	}
 
 	stopFloat, err := strconv.ParseFloat(stop, 32)
 	if err != nil {
-		return req.Responce{}, err
+		return req.Responce{}, errs.InvalidFloatValue
 	}
 	data, err := rp.DataStore.ZRange(key, startFloat, stopFloat)
 	if err != nil {

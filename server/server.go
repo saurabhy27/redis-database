@@ -45,6 +45,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 	defer conn.Close()
 	fmt.Println("Connection Created")
 	for {
+		conn.Write([]byte("redis> "))
 		buf := make([]byte, constants.ArgBufSize)
 		n, err := conn.Read(buf)
 		if err != nil {
@@ -75,13 +76,16 @@ func (s *Server) handleConnection(conn net.Conn) {
 }
 
 func (s *Server) writeError(err error, conn net.Conn) {
-	conn.Write([]byte(fmt.Sprintf("ERR: %s\n", err)))
+	conn.Write([]byte(fmt.Sprintf("ERR %s\n", err)))
 }
 
 func (s *Server) writeSuccess(value any, conn net.Conn) {
+	fmt.Println(value)
 	switch v := value.(type) {
 	case int:
-		conn.Write([]byte(fmt.Sprintf("OK: %d\n", v)))
+		conn.Write([]byte(fmt.Sprintf("%d\n", v)))
+	case string:
+		conn.Write([]byte(fmt.Sprintf("%s\n", v)))
 	case []string:
 		for _, s := range v {
 			conn.Write([]byte(fmt.Sprintf("%v\n", s)))
@@ -91,9 +95,13 @@ func (s *Server) writeSuccess(value any, conn net.Conn) {
 			conn.Write([]byte(fmt.Sprintf("%v  %f\n", v, k)))
 		}
 	case nil:
-		conn.Write([]byte("OK\n"))
+		conn.Write([]byte("(nil)\n"))
 	case []byte:
-		conn.Write([]byte(fmt.Sprintf("OK: %s\n", v)))
+		if len(v) == 0 {
+			conn.Write([]byte("(nil)\n"))
+		} else {
+			conn.Write([]byte(fmt.Sprintf("%s\n", v)))
+		}
 	default:
 		fmt.Println("Type is unknown!")
 	}

@@ -30,7 +30,7 @@ func (ds *DataStore) Get(key string) ([]byte, error) {
 	defer ds.lock.RUnlock()
 	value, ok := ds.data[key]
 	if !ok {
-		return nil, errs.NoDataFound
+		return nil, nil
 	}
 	v, ok := value.([]byte)
 	if !ok {
@@ -39,16 +39,16 @@ func (ds *DataStore) Get(key string) ([]byte, error) {
 	return v, nil
 }
 
-func (ds *DataStore) Delete(key string) error {
+func (ds *DataStore) Delete(key string) int {
 	ds.lock.Lock()
 	defer ds.lock.Unlock()
 	_, ok := ds.data[key]
 	if !ok {
-		return errs.NoDataFound
+		return 0
 	}
 	delete(ds.data, key)
 	delete(ds.expireData, key)
-	return nil
+	return 1
 }
 
 func (ds *DataStore) Keys(filter string) ([]string, error) {
@@ -57,9 +57,6 @@ func (ds *DataStore) Keys(filter string) ([]string, error) {
 	var keys []string
 	for k := range ds.data {
 		keys = append(keys, k)
-	}
-	if len(keys) == 0 {
-		return nil, errs.NoDataFound
 	}
 
 	var regMatchKeys []string
@@ -73,7 +70,6 @@ func (ds *DataStore) Keys(filter string) ([]string, error) {
 			regMatchKeys = append(regMatchKeys, key)
 		}
 	}
-
 	return regMatchKeys, nil
 }
 
@@ -82,24 +78,24 @@ func (ds *DataStore) expireInBackground(key string, seconds int) {
 	ds.Delete(key)
 }
 
-func (ds *DataStore) Expire(key string, seconds int) error {
+func (ds *DataStore) Expire(key string, seconds int) int {
 	_, ok := ds.data[key]
 	if !ok {
-		return errs.NoDataFound
+		return 0
 	}
 	ds.expireData[key] = int(time.Now().Unix()) + seconds
 	go ds.expireInBackground(key, seconds)
-	return nil
+	return 1
 }
 
-func (ds *DataStore) ZAdd(key string, score float64, member []byte) error {
+func (ds *DataStore) ZAdd(key string, score float64, member []byte) (int, error) {
 	ds.lock.Lock()
 	defer ds.lock.Unlock()
 	value, ok := ds.data[key]
 	if ok {
 		sList, ok := value.(*skiplist.SkipList)
 		if !ok {
-			return errs.WrongType
+			return 0, errs.WrongType
 		}
 		sList.Set(score, member)
 		ds.data[key] = sList
@@ -108,26 +104,25 @@ func (ds *DataStore) ZAdd(key string, score float64, member []byte) error {
 		skipList.Set(score, member)
 		ds.data[key] = skipList
 	}
-	return nil
+	return 1, nil
 }
 
 func (ds *DataStore) ZRange(key string, start float64, stop float64) (map[float64]string, error) {
 	ds.lock.RLock()
 	defer ds.lock.RUnlock()
+	data := make(map[float64]string)
 
 	value, ok := ds.data[key]
-	if !ok {
-		return nil, errs.NoDataFound
-	}
-	sList, ok := value.(*skiplist.SkipList)
-	if !ok {
-		return nil, errs.WrongType
-	}
-	data := make(map[float64]string)
-	elem := sList.Find(start)
-	for elem != nil && elem.Score() <= stop {
-		data[elem.Score()] = string(elem.Value.([]byte))
-		elem = elem.Next()
+	if ok {
+		sList, ok := value.(*skiplist.SkipList)
+		if !ok {
+			return nil, errs.WrongType
+		}
+		elem := sList.Find(start)
+		for elem != nil && elem.Score() <= stop {
+			data[elem.Score()] = string(elem.Value.([]byte))
+			elem = elem.Next()
+		}
 	}
 	return data, nil
 }
