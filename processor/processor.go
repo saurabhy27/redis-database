@@ -2,6 +2,7 @@ package processor
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/saurabhy27/redis-database/datastore"
 	"github.com/saurabhy27/redis-database/errs"
@@ -60,6 +61,8 @@ func (rp *RequestProcessor) processKeys(request req.Request) (req.Responce, erro
 	filter := ""
 	if len(request.Params) != 0 {
 		filter = request.Params[0]
+		filter = strings.ReplaceAll(filter, "*", "\\\\*")
+		filter = strings.ReplaceAll(filter, "?", "\\\\?")
 	}
 	data, err := rp.DataStore.Keys(filter)
 	if err != nil {
