@@ -74,3 +74,7 @@ These instructions will help you get the project up and running on your local ma
     saurabh12  12.000000
     saurabh10  10.000000
 
+### Testing
+1. Run the test cases
+   ```bash
+   go test ./...

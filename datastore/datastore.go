@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/huandu/skiplist"
 	"github.com/saurabhy27/redis-database/errs"
+	"github.com/saurabhy27/redis-database/model"
 )
 
 type DataStore struct {
@@ -102,40 +102,39 @@ func (ds *DataStore) ZAdd(key string, score float64, member []byte) (int, error)
 	defer ds.lock.Unlock()
 	value, ok := ds.data[key]
 	if ok {
-		sList, ok := value.(*skiplist.SkipList)
+		zList, ok := value.([]model.ZaddModel)
 		if !ok {
 			return 0, errs.WrongType
 		}
-		sList.Set(sList.Back().Score()+1, map[float64][]byte{score: []byte(member)})
-		ds.data[key] = sList
+		zList = append(zList, model.ZaddModel{Score: score, Member: []byte(member)})
+		ds.data[key] = zList
 	} else {
-		skipList := skiplist.New(skiplist.Float64)
-		skipList.Set(0, map[float64][]byte{score: []byte(member)})
-		ds.data[key] = skipList
+		zaddList := []model.ZaddModel{}
+		zaddList = append(zaddList, model.ZaddModel{Score: score, Member: []byte(member)})
+		ds.data[key] = zaddList
 	}
 	return 1, nil
 }
 
-func (ds *DataStore) ZRange(key string, start float64, stop float64) (map[float64]string, error) {
-	log.Printf("Retrieving the key %s from start index %f to stop index %f from sorted set\n", key, start, stop)
+func (ds *DataStore) ZRange(key string, start int, stop int) (map[float64]string, error) {
+	log.Printf("Retrieving the key %s from start index %d to stop index %d from sorted set\n", key, start, stop)
 	ds.lock.RLock()
 	defer ds.lock.RUnlock()
 	data := make(map[float64]string)
 
 	value, ok := ds.data[key]
 	if ok {
-		sList, ok := value.(*skiplist.SkipList)
+		sList, ok := value.([]model.ZaddModel)
 		if !ok {
 			return nil, errs.WrongType
 		}
-		elem := sList.Find(start)
-		for elem != nil && elem.Score() <= stop {
-			val, _ := elem.Value.(map[float64][]byte)
-			for k, v := range val {
-				data[k] = string(v)
+		if len(sList) > start {
+			for i := start; i < len(sList) && i <= stop; i++ {
+				data[sList[i].Score] = string(sList[i].Member)
 			}
-			elem = elem.Next()
+
 		}
+
 	}
 	return data, nil
 }

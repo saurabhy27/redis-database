@@ -9,4 +9,5 @@ var (
 	WrongType         = errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
 	MinReqParams      = errors.New("wrong number of arguments for given command")
 	InvalidFloatValue = errors.New("value is not a valid float")
+	InvalidIntValue   = errors.New("value is not a valid int")
 )

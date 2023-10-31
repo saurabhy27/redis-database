@@ -103,16 +103,16 @@ func (rp *RequestProcessor) processZRange(request req.Request) (req.Responce, er
 	key := request.Params[0]
 	start := request.Params[1]
 	stop := request.Params[2]
-	startFloat, err := strconv.ParseFloat(start, 32)
+	startInt, err := strconv.Atoi(start)
 	if err != nil {
-		return req.Responce{}, errs.InvalidFloatValue
+		return req.Responce{}, errs.InvalidIntValue
 	}
 
-	stopFloat, err := strconv.ParseFloat(stop, 32)
+	stopInt, err := strconv.Atoi(stop)
 	if err != nil {
-		return req.Responce{}, errs.InvalidFloatValue
+		return req.Responce{}, errs.InvalidIntValue
 	}
-	data, err := rp.DataStore.ZRange(key, startFloat, stopFloat)
+	data, err := rp.DataStore.ZRange(key, startInt, stopInt)
 	if err != nil {
 		return req.Responce{}, err
 	}
