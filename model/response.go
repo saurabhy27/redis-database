@@ -1,4 +1,4 @@
-package request
+package model
 
 type Responce struct {
 	Success bool

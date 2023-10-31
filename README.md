@@ -78,3 +78,6 @@ These instructions will help you get the project up and running on your local ma
 1. Run the test cases
    ```bash
    go test ./...
+2. Run the test cases and check the coverage
+    ```bash
+    go test  -coverpkg ./... ./... -v

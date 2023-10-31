@@ -1,7 +1,7 @@
 package processor
 
-import req "github.com/saurabhy27/redis-database/request"
+import "github.com/saurabhy27/redis-database/model"
 
 type RequestProcessorInterface interface {
-	Process(request req.Request) (req.Responce, error)
+	Process(request model.Request) (model.Responce, error)
 }

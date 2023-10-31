@@ -5,30 +5,21 @@ import (
 
 	"github.com/saurabhy27/redis-database/constants"
 	"github.com/saurabhy27/redis-database/errs"
+	"github.com/saurabhy27/redis-database/model"
 )
-
-type Command struct {
-	Cmd          string
-	MinReqParams int
-}
-
-type Request struct {
-	Command Command
-	Params  []string
-}
 
 var (
-	CMDGet    Command = Command{Cmd: constants.GET, MinReqParams: 1}
-	CMDDel    Command = Command{Cmd: constants.DEL, MinReqParams: 1}
-	CMDExpire Command = Command{Cmd: constants.EXPIRE, MinReqParams: 2}
-	CMDKeys   Command = Command{Cmd: constants.KEYS, MinReqParams: 1}
-	CMDSet    Command = Command{Cmd: constants.SET, MinReqParams: 2}
-	CMDTtl    Command = Command{Cmd: constants.TTL, MinReqParams: 1}
-	CMDZAdd   Command = Command{Cmd: constants.ZADD, MinReqParams: 3}
-	CMDZRange Command = Command{Cmd: constants.ZRANGE, MinReqParams: 3}
+	CMDGet    = model.Command{Cmd: constants.GET, MinReqParams: 1}
+	CMDDel    = model.Command{Cmd: constants.DEL, MinReqParams: 1}
+	CMDExpire = model.Command{Cmd: constants.EXPIRE, MinReqParams: 2}
+	CMDKeys   = model.Command{Cmd: constants.KEYS, MinReqParams: 1}
+	CMDSet    = model.Command{Cmd: constants.SET, MinReqParams: 2}
+	CMDTtl    = model.Command{Cmd: constants.TTL, MinReqParams: 1}
+	CMDZAdd   = model.Command{Cmd: constants.ZADD, MinReqParams: 3}
+	CMDZRange = model.Command{Cmd: constants.ZRANGE, MinReqParams: 3}
 )
 
-func parseCommand(cmd string) (Command, error) {
+func parseCommand(cmd string) (model.Command, error) {
 	switch cmd {
 	case constants.GET:
 		return CMDGet, nil
@@ -47,22 +38,22 @@ func parseCommand(cmd string) (Command, error) {
 	case constants.ZRANGE:
 		return CMDZRange, nil
 	default:
-		return Command{}, errs.InvalidCommand
+		return model.Command{}, errs.InvalidCommand
 	}
 }
 
-func ParseProtocol(input string) (Request, error) {
+func ParseProtocol(input string) (model.Request, error) {
 	input_splited := strings.Split(input, " ")
 	if len(input_splited) == 0 {
-		return Request{}, errs.EmptyRequest
+		return model.Request{}, errs.EmptyRequest
 	}
 	command, err := parseCommand(input_splited[0])
 	if err != nil {
-		return Request{}, errs.InvalidCommand
+		return model.Request{}, errs.InvalidCommand
 	}
 	params := input_splited[1:]
 	if len(params) < command.MinReqParams {
-		return Request{}, errs.MinReqParams
+		return model.Request{}, errs.MinReqParams
 	}
-	return Request{Command: command, Params: params}, nil
+	return model.Request{Command: command, Params: params}, nil
 }
