@@ -40,7 +40,7 @@ These instructions will help you get the project up and running on your local ma
    git clone https://github.com/saurabhy27/redis-database.git
 2. Change to the project directory.
     ```bash
-    cd redis-like-server
+    cd redis-database
 3. Run the server.
     ```bash
     go run main.go
