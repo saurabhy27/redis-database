@@ -18,3 +18,17 @@ func Contains(s []string, e string) bool {
 	}
 	return false
 }
+
+func FormatArrayStartNEndIdx(start, stop, n int) (int, int) {
+	if start < 0 {
+		start = 0
+	}
+	if stop < 0 {
+		stop = n + stop
+	}
+	if stop >= n {
+		stop = n - 1
+	}
+	stop += 1
+	return start, stop
+}

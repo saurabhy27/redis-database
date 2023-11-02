@@ -8,6 +8,7 @@ import (
 
 	"github.com/saurabhy27/redis-database/errs"
 	"github.com/saurabhy27/redis-database/model"
+	"github.com/saurabhy27/redis-database/utils"
 )
 
 type DataStore struct {
@@ -128,11 +129,11 @@ func (ds *DataStore) ZRange(key string, start int, stop int) (map[float64]string
 		if !ok {
 			return nil, errs.WrongType
 		}
-		if len(sList) > start {
-			for i := start; i < len(sList) && i <= stop; i++ {
-				data[sList[i].Score] = string(sList[i].Member)
+		start, stop = utils.FormatArrayStartNEndIdx(start, stop, len(sList))
+		if stop >= 0 && start < stop {
+			for _, zaddModel := range sList[start:stop] {
+				data[zaddModel.Score] = string(zaddModel.Member)
 			}
-
 		}
 
 	}

@@ -1,7 +1,6 @@
 package unittest
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -119,7 +118,24 @@ func TestZRange(t *testing.T) {
 	dsStore.ZAdd(key, score1, expVal1)
 	dsStore.ZAdd(key, score2, expVal2)
 	actVal, err := dsStore.ZRange(key, 0, 1)
-	fmt.Println(actVal)
+	if err != nil {
+		t.Errorf("Expected err to be nil, got %v", err)
+	}
+	if actVal[score1] != string(expVal1) {
+		t.Errorf("Expected act[%f] to be %s, got %s", score1, string(expVal1), actVal[score1])
+	}
+	if actVal[score1] != string(expVal1) {
+		t.Errorf("Expected act[%f] to be %s, got %s", score1, string(expVal1), actVal[score1])
+	}
+}
+
+func TestZRangeNegIdx(t *testing.T) {
+	dsStore := datastore.New()
+	key, score1, expVal1 := "test", 10.0, []byte("test123")
+	score2, expVal2 := 21.1, []byte("care123")
+	dsStore.ZAdd(key, score1, expVal1)
+	dsStore.ZAdd(key, score2, expVal2)
+	actVal, err := dsStore.ZRange(key, 0, -1)
 	if err != nil {
 		t.Errorf("Expected err to be nil, got %v", err)
 	}
