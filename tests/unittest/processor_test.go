@@ -135,8 +135,8 @@ func TestProcessZRange(t *testing.T) {
 	if !dataStore.ZRangeMocked {
 		t.Errorf("Mocked ZRANGE Function not called")
 	}
-	zRange, _ := response.Value.(map[float64]string)
-	if zRange[1] != "test123" {
-		t.Errorf("Expected zrange[1] to be test123, got %s", zRange[1])
+	zRange, _ := response.Value.([]model.SortedSet)
+	if zRange[0].Member != "test123" {
+		t.Errorf("Expected zrange[1] to be test123, got %s", zRange[0].Member)
 	}
 }

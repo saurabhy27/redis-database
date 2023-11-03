@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/saurabhy27/redis-database/constants"
+	"github.com/saurabhy27/redis-database/model"
 	"github.com/saurabhy27/redis-database/processor"
 	request "github.com/saurabhy27/redis-database/request"
 )
@@ -93,6 +94,10 @@ func (s *Server) writeSuccess(value any, conn net.Conn) {
 	case map[float64]string:
 		for k, v := range v {
 			conn.Write([]byte(fmt.Sprintf("%v  %f\n", v, k)))
+		}
+	case []model.SortedSet:
+		for _, sortedSet := range v {
+			conn.Write([]byte(fmt.Sprintf("%v  %f\n", sortedSet.Member, sortedSet.Score)))
 		}
 	case nil:
 		conn.Write([]byte("(nil)\n"))

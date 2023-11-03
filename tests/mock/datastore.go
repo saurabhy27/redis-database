@@ -1,5 +1,7 @@
 package mock
 
+import "github.com/saurabhy27/redis-database/model"
+
 type MockDataStore struct {
 	GetMocked    bool
 	DeleteMocked bool
@@ -45,7 +47,7 @@ func (mds *MockDataStore) ZAdd(key string, score float64, member []byte) (int, e
 	return 1, nil
 }
 
-func (mds *MockDataStore) ZRange(key string, start int, stop int) (map[float64]string, error) {
+func (mds *MockDataStore) ZRange(key string, start int, stop int) ([]model.SortedSet, error) {
 	mds.ZRangeMocked = true
-	return map[float64]string{1: "test123"}, nil
+	return []model.SortedSet{{Score: 1, Member: "test123"}}, nil
 }

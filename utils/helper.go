@@ -29,6 +29,5 @@ func FormatArrayStartNEndIdx(start, stop, n int) (int, int) {
 	if stop >= n {
 		stop = n - 1
 	}
-	stop += 1
 	return start, stop
 }

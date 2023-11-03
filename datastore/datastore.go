@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/huandu/skiplist"
 	"github.com/saurabhy27/redis-database/errs"
 	"github.com/saurabhy27/redis-database/model"
 	"github.com/saurabhy27/redis-database/utils"
@@ -103,39 +104,44 @@ func (ds *DataStore) ZAdd(key string, score float64, member []byte) (int, error)
 	defer ds.lock.Unlock()
 	value, ok := ds.data[key]
 	if ok {
-		zList, ok := value.([]model.ZaddModel)
+		sList, ok := value.(*skiplist.SkipList)
 		if !ok {
 			return 0, errs.WrongType
 		}
-		zList = append(zList, model.ZaddModel{Score: score, Member: []byte(member)})
-		ds.data[key] = zList
+		sList.Set(score, member)
+		ds.data[key] = sList
 	} else {
-		zaddList := []model.ZaddModel{}
-		zaddList = append(zaddList, model.ZaddModel{Score: score, Member: []byte(member)})
-		ds.data[key] = zaddList
+		skipList := skiplist.New(skiplist.Float64)
+		skipList.Set(score, member)
+		ds.data[key] = skipList
 	}
 	return 1, nil
 }
 
-func (ds *DataStore) ZRange(key string, start int, stop int) (map[float64]string, error) {
+func (ds *DataStore) ZRange(key string, start int, stop int) ([]model.SortedSet, error) {
 	log.Printf("Retrieving the key %s from start index %d to stop index %d from sorted set\n", key, start, stop)
 	ds.lock.RLock()
 	defer ds.lock.RUnlock()
-	data := make(map[float64]string)
+	data := []model.SortedSet{}
 
 	value, ok := ds.data[key]
 	if ok {
-		sList, ok := value.([]model.ZaddModel)
+		sList, ok := value.(*skiplist.SkipList)
 		if !ok {
 			return nil, errs.WrongType
 		}
-		start, stop = utils.FormatArrayStartNEndIdx(start, stop, len(sList))
-		if stop >= 0 && start < stop {
-			for _, zaddModel := range sList[start:stop] {
-				data[zaddModel.Score] = string(zaddModel.Member)
+		start, stop = utils.FormatArrayStartNEndIdx(start, stop, sList.Len())
+		if stop >= 0 && start <= stop {
+			s := sList.Front()
+			currentIndex := 0
+			for s != nil && currentIndex <= stop {
+				if currentIndex >= start {
+					data = append(data, model.SortedSet{Score: s.Score(), Member: string(s.Value.([]byte))})
+				}
+				currentIndex += 1
+				s = s.Next()
 			}
 		}
-
 	}
 	return data, nil
 }

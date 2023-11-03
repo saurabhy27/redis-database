@@ -1,5 +1,7 @@
 package datastore
 
+import "github.com/saurabhy27/redis-database/model"
+
 type DataStoreInterface interface {
 	Get(key string) ([]byte, error)
 	Delete(key string) int
@@ -8,5 +10,5 @@ type DataStoreInterface interface {
 	Set(key string, value []byte)
 	Ttl(key string) int
 	ZAdd(key string, score float64, member []byte) (int, error)
-	ZRange(key string, start int, stop int) (map[float64]string, error)
+	ZRange(key string, start int, stop int) ([]model.SortedSet, error)
 }

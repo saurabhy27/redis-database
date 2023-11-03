@@ -121,11 +121,11 @@ func TestZRange(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected err to be nil, got %v", err)
 	}
-	if actVal[score1] != string(expVal1) {
-		t.Errorf("Expected act[%f] to be %s, got %s", score1, string(expVal1), actVal[score1])
+	if actVal[0].Member != string(expVal1) {
+		t.Errorf("Expected act[%f] to be %s, got %s", score1, string(expVal1), actVal[0].Member)
 	}
-	if actVal[score1] != string(expVal1) {
-		t.Errorf("Expected act[%f] to be %s, got %s", score1, string(expVal1), actVal[score1])
+	if actVal[1].Member != string(expVal2) {
+		t.Errorf("Expected act[%f] to be %s, got %s", score2, string(expVal2), actVal[1].Member)
 	}
 }
 
@@ -139,11 +139,11 @@ func TestZRangeNegIdx(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected err to be nil, got %v", err)
 	}
-	if actVal[score1] != string(expVal1) {
-		t.Errorf("Expected act[%f] to be %s, got %s", score1, string(expVal1), actVal[score1])
+	if actVal[0].Member != string(expVal1) {
+		t.Errorf("Expected act[%f] to be %s, got %s", score1, string(expVal1), actVal[0].Member)
 	}
-	if actVal[score1] != string(expVal1) {
-		t.Errorf("Expected act[%f] to be %s, got %s", score1, string(expVal1), actVal[score1])
+	if actVal[1].Member != string(expVal2) {
+		t.Errorf("Expected act[%f] to be %s, got %s", score2, string(expVal2), actVal[1].Member)
 	}
 }
 
