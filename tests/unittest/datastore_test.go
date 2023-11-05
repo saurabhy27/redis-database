@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/saurabhy27/redis-database/datastore"
+	"github.com/saurabhy27/redis-database/model"
 	"github.com/saurabhy27/redis-database/utils"
 )
 
@@ -101,8 +102,8 @@ func TestExpire(t *testing.T) {
 
 func TestZAdd(t *testing.T) {
 	dsStore := datastore.New()
-	key, score, expVal := "test", 10.0, []byte("test123")
-	actVal, err := dsStore.ZAdd(key, score, expVal)
+	key, sorted_set := "test", []model.SortedSetByte{model.SortedSetByte{Score: 10.0, Member: []byte("test123")}}
+	actVal, err := dsStore.ZAdd(key, sorted_set)
 	if actVal != 1 {
 		t.Errorf("Expected val to be 1, got %d", actVal)
 	}
@@ -115,8 +116,11 @@ func TestZRange(t *testing.T) {
 	dsStore := datastore.New()
 	key, score1, expVal1 := "test", 10.0, []byte("test123")
 	score2, expVal2 := 21.1, []byte("care123")
-	dsStore.ZAdd(key, score1, expVal1)
-	dsStore.ZAdd(key, score2, expVal2)
+
+	sorted_set := []model.SortedSetByte{model.SortedSetByte{Score: score1, Member: expVal1}}
+	sorted_set = append(sorted_set, model.SortedSetByte{Score: score2, Member: expVal2})
+	dsStore.ZAdd(key, sorted_set)
+
 	actVal, err := dsStore.ZRange(key, 0, 1)
 	if err != nil {
 		t.Errorf("Expected err to be nil, got %v", err)
@@ -133,8 +137,10 @@ func TestZRangeNegIdx(t *testing.T) {
 	dsStore := datastore.New()
 	key, score1, expVal1 := "test", 10.0, []byte("test123")
 	score2, expVal2 := 21.1, []byte("care123")
-	dsStore.ZAdd(key, score1, expVal1)
-	dsStore.ZAdd(key, score2, expVal2)
+
+	sorted_set := []model.SortedSetByte{{Score: score1, Member: expVal1}}
+	sorted_set = append(sorted_set, model.SortedSetByte{Score: score2, Member: expVal2})
+	dsStore.ZAdd(key, sorted_set)
 	actVal, err := dsStore.ZRange(key, 0, -1)
 	if err != nil {
 		t.Errorf("Expected err to be nil, got %v", err)

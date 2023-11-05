@@ -9,6 +9,6 @@ type DataStoreInterface interface {
 	Keys(filter string) ([]string, error)
 	Set(key string, value []byte)
 	Ttl(key string) int
-	ZAdd(key string, score float64, member []byte) (int, error)
+	ZAdd(key string, sorted_set []model.SortedSetByte) (int, error)
 	ZRange(key string, start int, stop int) ([]model.SortedSet, error)
 }

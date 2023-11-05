@@ -10,4 +10,5 @@ var (
 	MinReqParams      = errors.New("wrong number of arguments for given command")
 	InvalidFloatValue = errors.New("value is not a valid float")
 	InvalidIntValue   = errors.New("value is not a valid int")
+	SyntaxError       = errors.New("syntax error")
 )

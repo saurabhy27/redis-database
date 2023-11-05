@@ -42,9 +42,9 @@ func (mds *MockDataStore) Ttl(key string) int {
 	return 1
 }
 
-func (mds *MockDataStore) ZAdd(key string, score float64, member []byte) (int, error) {
+func (mds *MockDataStore) ZAdd(key string, sorted_set []model.SortedSetByte) (int, error) {
 	mds.ZAddMocked = true
-	return 1, nil
+	return 2, nil
 }
 
 func (mds *MockDataStore) ZRange(key string, start int, stop int) ([]model.SortedSet, error) {

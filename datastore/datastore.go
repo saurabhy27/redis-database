@@ -98,24 +98,31 @@ func (ds *DataStore) Expire(key string, seconds int) int {
 	return 1
 }
 
-func (ds *DataStore) ZAdd(key string, score float64, member []byte) (int, error) {
-	log.Printf("Adding the key %s score %f in sorted set\n", key, score)
+func (ds *DataStore) ZAdd(key string, sorted_set []model.SortedSetByte) (int, error) {
+	log.Printf("Adding the key %s score %v in sorted set\n", key, sorted_set)
 	ds.lock.Lock()
 	defer ds.lock.Unlock()
 	value, ok := ds.data[key]
+	resp := 0
 	if ok {
 		sList, ok := value.(*skiplist.SkipList)
 		if !ok {
 			return 0, errs.WrongType
 		}
-		sList.Set(score, member)
+		for _, set := range sorted_set {
+			sList.Set(set.Score, set.Member)
+			resp += 1
+		}
 		ds.data[key] = sList
 	} else {
 		skipList := skiplist.New(skiplist.Float64)
-		skipList.Set(score, member)
+		for _, set := range sorted_set {
+			skipList.Set(set.Score, set.Member)
+			resp += 1
+		}
 		ds.data[key] = skipList
 	}
-	return 1, nil
+	return resp, nil
 }
 
 func (ds *DataStore) ZRange(key string, start int, stop int) ([]model.SortedSet, error) {

@@ -87,13 +87,24 @@ func (rp *RequestProcessor) processTtl(request model.Request) (model.Responce, e
 
 func (rp *RequestProcessor) processZAdd(request model.Request) (model.Responce, error) {
 	key := request.Params[0]
-	score := request.Params[1]
-	value := request.Params[2]
-	scoreFloat, err := strconv.ParseFloat(score, 32)
-	if err != nil {
-		return model.Responce{}, errs.InvalidFloatValue
+
+	param := request.Params[1:]
+	if len(param)%2 != 0 {
+		return model.Responce{}, errs.SyntaxError
 	}
-	added, err := rp.DataStore.ZAdd(key, scoreFloat, []byte(value))
+	var sorted_set []model.SortedSetByte
+
+	for i := 0; i < len(param); i += 2 {
+		score := param[i]
+		value := param[i+1]
+		scoreFloat, err := strconv.ParseFloat(score, 32)
+		if err != nil {
+			return model.Responce{}, errs.InvalidFloatValue
+		}
+		sorted_set = append(sorted_set, model.SortedSetByte{Score: scoreFloat, Member: []byte(value)})
+	}
+
+	added, err := rp.DataStore.ZAdd(key, sorted_set)
 	if err != nil {
 		return model.Responce{}, err
 	}

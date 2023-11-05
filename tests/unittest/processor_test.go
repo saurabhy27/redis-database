@@ -110,7 +110,7 @@ func TestProcessTtl(t *testing.T) {
 func TestProcessZAdd(t *testing.T) {
 	dataStore := &mock.MockDataStore{}
 	reqProcessor := processor.RequestProcessor{DataStore: dataStore}
-	request := model.Request{Command: req.CMDZAdd, Params: []string{"test", "1", "test123"}}
+	request := model.Request{Command: req.CMDZAdd, Params: []string{"test", "1", "test123", "2", "test123"}}
 	response, err := reqProcessor.Process(request)
 	if err != nil {
 		t.Errorf("Expected err to be nil, got %v", err)
@@ -119,7 +119,7 @@ func TestProcessZAdd(t *testing.T) {
 		t.Errorf("Mocked ZADD Function not called")
 	}
 	zadd, _ := response.Value.(int)
-	if zadd != 1 {
+	if zadd != 2 {
 		t.Errorf("Expected zadd to be 1, got %d", zadd)
 	}
 }
